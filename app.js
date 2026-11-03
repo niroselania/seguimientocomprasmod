@@ -199,6 +199,8 @@ rowsEl.addEventListener("click", async (event) => {
 
 api("/api/config").then((config) => {
   document.querySelector("#limitAmount").textContent = pesos.format(config.limit_amount);
+  document.querySelector("#periodText").textContent =
+    `Cupo vigente del ${formatDate(config.current_period_start)} al ${formatDate(config.current_period_end)}; se renueva cada 6 meses.`;
 });
 setPurchaseDateToToday();
 loadPurchases();

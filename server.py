@@ -312,9 +312,28 @@ def enriched_purchase(row):
     return row
 
 
-def summaries():
+def summaries(current_only=True):
     grouped = {}
-    for row in purchase_query():
+    rows = purchase_query()
+    current_start, current_end = period_for(date.today().isoformat())
+    if current_only:
+        for row in rows:
+            key = (row["dni"], current_start, current_end)
+            if key not in grouped:
+                grouped[key] = {
+                    "dni": row["dni"],
+                    "full_name": row["full_name"],
+                    "email": row["email"],
+                    "period_start": current_start,
+                    "period_end": current_end,
+                    "total": 0,
+                    "orders": 0,
+                }
+        rows = [
+            row for row in rows
+            if current_start <= row["purchase_date"] <= current_end
+        ]
+    for row in rows:
         key = (row["dni"], row["period_start"], row["period_end"])
         if key not in grouped:
             grouped[key] = {
@@ -376,7 +395,7 @@ def build_backup_xlsx():
     rows = purchase_query()
     summary_lookup = {
         (item["dni"], item["period_start"], item["period_end"]): item
-        for item in summaries()
+        for item in summaries(current_only=False)
     }
 
     sheet_rows = []
@@ -512,11 +531,14 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         parsed = urlparse(self.path)
         if parsed.path == "/api/config":
+            period_start, period_end = period_for(date.today().isoformat())
             self.send_json(
                 {
                     "limit_amount": LIMIT_AMOUNT,
                     "anchor_date": ANCHOR_DATE.isoformat(),
                     "period_months": PERIOD_MONTHS,
+                    "current_period_start": period_start,
+                    "current_period_end": period_end,
                 }
             )
             return
