@@ -408,11 +408,75 @@ def search_person_period_totals(query):
     return [], {"name": name, "dni": dni, "periods": periods}
 
 
+def all_people_period_totals():
+    with db() as con:
+        records = con.execute(
+            "SELECT dni, full_name, purchase_date, amount FROM purchases ORDER BY full_name, purchase_date, id"
+        ).fetchall()
+    people = {}
+    for row in records:
+        person = people.setdefault(row["dni"], {"name": row["full_name"], "period_totals": {}})
+        start, _ = period_for(row["purchase_date"])
+        person["period_totals"][start] = person["period_totals"].get(start, 0) + float(row["amount"])
+
+    current_start, _ = period_for(date.today().isoformat())
+    result = []
+    for dni, person in people.items():
+        totals = person["period_totals"]
+        first = parse_purchase_date(min(totals))
+        last = max(parse_purchase_date(current_start), parse_purchase_date(max(totals)))
+        periods = []
+        cursor = first
+        while cursor <= last:
+            start, end = period_for(cursor.isoformat())
+            periods.append((start, end, round(totals.get(start, 0), 2)))
+            cursor = date(cursor.year + (cursor.month + PERIOD_MONTHS - 1) // 12,
+                          (cursor.month + PERIOD_MONTHS - 1) % 12 + 1, 1)
+        result.append({"name": person["name"], "dni": dni, "periods": periods})
+    return sorted(result, key=lambda person: normalized_name(person["name"]))
+
+
 def format_telegram_totals(result):
     lines = [f"Compras de {result['name']} (DNI {result['dni']}):"]
     for start, end, total in result["periods"]:
         lines.append(f"{format_display_date(start)} al {format_display_date(end)}: ${total:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."))
     return "\n".join(lines)
+
+
+def format_telegram_all_totals(people):
+    if not people:
+        return "Todavía no hay compras registradas."
+    blocks = ["Totales de todas las personas con compras:"]
+    for person in people:
+        block = [f"{person['name']} · DNI {person['dni']}"]
+        block.extend(
+            f"  {format_display_date(start)} al {format_display_date(end)}: ${total:,.2f}"
+            .replace(",", "X").replace(".", ",").replace("X", ".")
+            for start, end, total in person["periods"]
+        )
+        blocks.append("\n".join(block))
+    return "\n\n".join(blocks)
+
+
+def send_telegram_long_message(token, chat_id, text):
+    max_length = 3500
+    chunks = []
+    current = ""
+    for block in text.split("\n\n"):
+        addition = block if not current else f"\n\n{block}"
+        if len(current) + len(addition) <= max_length:
+            current += addition
+            continue
+        if current:
+            chunks.append(current)
+        while len(block) > max_length:
+            chunks.append(block[:max_length])
+            block = block[max_length:]
+        current = block
+    if current:
+        chunks.append(current)
+    for chunk in chunks:
+        send_telegram_message(token, chat_id, chunk)
 
 
 def telegram_request(token, method, payload):
@@ -439,13 +503,20 @@ def handle_telegram_message(token, allowed_chats, message):
         command, _, argument = text.partition(" ")
         command = command.split("@", 1)[0].lower()
         if command in ("/start", "/help", "/ayuda"):
-            send_telegram_message(token, chat_id, "Escribí el nombre y apellido de la persona para ver sus totales por semestre.")
+            send_telegram_message(token, chat_id, "Escribí un nombre para ver sus totales por semestre, o enviá «todos» para listar a todas las personas con compras.")
+            return
+        if command in ("/todos", "/todas"):
+            send_telegram_long_message(token, chat_id, format_telegram_all_totals(all_people_period_totals()))
             return
         query = argument.strip()
     else:
         query = text
     if not query:
         send_telegram_message(token, chat_id, "Escribí un nombre para buscar.")
+        return
+
+    if normalized_name(query) in ("todos", "todo", "todas", "todos los empleados", "todas las personas"):
+        send_telegram_long_message(token, chat_id, format_telegram_all_totals(all_people_period_totals()))
         return
 
     matches, result = search_person_period_totals(query)
