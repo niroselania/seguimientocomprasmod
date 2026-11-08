@@ -153,10 +153,10 @@ kbd { position: absolute; top: 50%; right: 9px; display: grid; place-items: cent
 .summary-card > span { display: block; overflow: hidden; color: #8294ad; font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
 .summary-card strong { display: block; margin: 7px 0 5px; color: #eaf1fa; font: 700 17px 'Manrope', sans-serif; }
 .summary-card.exceeded { border-color: rgba(255,123,133,.35); background: var(--red-bg); }
-.table-wrap { overflow: hidden; }
+.table-wrap { overflow-x: auto; overflow-y: hidden; }
 .table-wrap > table { width: 100%; border-collapse: collapse; min-width: 1000px; }
 th, td { padding: 12px 11px; border-bottom: 1px solid var(--line-soft); text-align: left; vertical-align: middle; font-size: 10px; }
-th { position: sticky; top: 64px; z-index: 1; background: #1b2639; color: #91a2ba; font-size: 9px; font-weight: 700; letter-spacing: .045em; text-transform: uppercase; }
+th { background: #1b2639; color: #91a2ba; font-size: 9px; font-weight: 700; letter-spacing: .045em; text-transform: uppercase; }
 td { color: #c7d2e1; }
 td:nth-child(3) { color: #edf2fa; font-weight: 600; }
 tbody tr { transition: background .16s ease; }
@@ -234,7 +234,6 @@ td.amount { color: #8be0c1; font-weight: 700; white-space: nowrap; }
   .nav-link.active { box-shadow: inset 0 -2px var(--cyan); }
   .workspace { margin-left: 0; }
   .topbar { position: static; }
-  th { top: 0; }
 }
 @media (max-width: 680px) {
   .topbar { min-height: 53px; padding: 0 16px; }
