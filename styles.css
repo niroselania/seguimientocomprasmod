@@ -80,6 +80,8 @@ a { color: inherit; }
 .period-pill .status-dot { width: 6px; height: 6px; }
 .avatar { display: grid; place-items: center; width: 31px; height: 31px; border: 1px solid rgba(80,214,210,.3); border-radius: 50%; background: rgba(80,214,210,.12); color: #87e5df; font: 700 12px 'Manrope', sans-serif; }
 .page-content { width: min(1520px, 100%); margin: 0 auto; padding: 34px clamp(22px, 3.3vw, 48px) 28px; }
+.theme-notice { display: flex; align-items: center; gap: 10px; margin: -12px 0 23px; padding: 10px 13px; border: 1px solid rgba(80,214,210,.2); border-radius: 9px; background: linear-gradient(90deg, rgba(80,214,210,.09), rgba(80,214,210,.025)); color: #a9c5d0; font-size: 11px; }
+.theme-notice-icon { display: grid; place-items: center; width: 22px; height: 22px; flex: 0 0 auto; border-radius: 7px; background: rgba(80,214,210,.13); color: var(--cyan); font-size: 14px; }
 .page-heading, .records-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; }
 .eyebrow { margin: 0 0 8px; color: var(--cyan); font-size: 9px; font-weight: 700; letter-spacing: .16em; }
 h1, h2, p { margin-top: 0; }
@@ -216,6 +218,8 @@ td.amount { color: #8be0c1; font-weight: 700; white-space: nowrap; }
 :root[data-theme="light"] .table-footer { background: #f7f9fc; color: #718198; }
 :root[data-theme="light"] .page-footer { color: #7d8ba0; }
 :root[data-theme="light"] .page-footer span { color: #a1adbd; }
+:root[data-theme="light"] .theme-notice { border-color: rgba(22,141,145,.18); background: linear-gradient(90deg, rgba(22,141,145,.075), rgba(22,141,145,.02)); color: #4e6c7b; }
+:root[data-theme="light"] .theme-notice-icon { background: rgba(22,141,145,.1); }
 
 @media (max-width: 1200px) {
   .sidebar { width: 215px; }
