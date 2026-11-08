@@ -2,6 +2,8 @@
 
 Sitio interno para registrar compras y controlar el cupo semestral por persona. La interfaz usa un panel oscuro con navegación lateral, tarjetas de resumen y una tabla compacta.
 
+En la barra superior, cada persona puede alternar entre tema claro y oscuro. La selección queda guardada en el navegador que utiliza.
+
 ## Regla del cupo
 
 - Cupo por persona: $1.400.000.

@@ -10,8 +10,30 @@ const recordId = document.querySelector("#recordId");
 const exportPeriod = document.querySelector("#exportPeriod");
 const exportPerson = document.querySelector("#exportPerson");
 const exportButton = document.querySelector("#exportButton");
+const themeToggle = document.querySelector("#themeToggle");
 
 let purchases = [];
+
+function applyTheme(theme, save = true) {
+  const selectedTheme = theme === "light" ? "light" : "dark";
+  document.documentElement.dataset.theme = selectedTheme;
+  const nextTheme = selectedTheme === "dark" ? "light" : "dark";
+  const nextLabel = nextTheme === "light" ? "Claro" : "Oscuro";
+  document.querySelector("#themeLabel").textContent = nextLabel;
+  document.querySelector("#themeIcon").textContent = nextTheme === "light" ? "☼" : "☾";
+  themeToggle.setAttribute("aria-label", `Cambiar a modo ${nextLabel.toLowerCase()}`);
+  themeToggle.title = `Cambiar a modo ${nextLabel.toLowerCase()}`;
+  themeToggle.setAttribute("aria-pressed", String(selectedTheme === "light"));
+  document.querySelector('meta[name="theme-color"]').content = selectedTheme === "dark" ? "#101626" : "#f1f5fa";
+  if (save) {
+    try { localStorage.setItem("patagonia-theme", selectedTheme); } catch (_) { /* Preferencia limitada por el navegador. */ }
+  }
+}
+
+themeToggle.addEventListener("click", () => {
+  applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
+});
+applyTheme(document.documentElement.dataset.theme || "dark", false);
 
 function todayISO() {
   const now = new Date();
